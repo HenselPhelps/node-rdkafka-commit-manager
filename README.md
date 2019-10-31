@@ -2,6 +2,10 @@
 
 A simple helper for controlling when an offset is ready to be committed via node-rdkafka.
 
+# Goals
+
+This package is intended to help you implement at-least-once processing without making a network call for every message you process.
+
 During frequent use, the commit manager will commit offsets only as often as a configurable commit interval.
 
 During infrequent use, the commit manager will always immediately commit if it has seen a period of inactivity exceeding the configurable commit interval.
