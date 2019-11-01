@@ -2,7 +2,7 @@
 
 A simple helper for controlling when an offset is ready to be committed via node-rdkafka.
 
-# Goals
+## Goals
 
 This package is intended to help you implement at-least-once processing without making a network call for every message you process.
 
@@ -10,7 +10,7 @@ During frequent use, the commit manager will commit offsets only as often as a c
 
 During infrequent use, the commit manager will always immediately commit if it has seen a period of inactivity exceeding the configurable commit interval.
 
-# useCommitManager
+## useCommitManager
 
 The commit manager is exposed via a hook function (you don't need to be using React in order to use this.)
 
@@ -30,9 +30,30 @@ The commit manager is exposed via a hook function (you don't need to be using Re
 - onRebalance()
   - Call this whenever your KafkaConsumer has its partitions revoked.
 
-# Usage Example
+## Usage Example
 
-```
+This package can be used from JavaScript or TypeScript.
+
+The examples below illustrate a few key points about using this commit manager:
+
+1. Disable auto-commit feature on your KafkaConsumer.
+
+   - Otherwise, the commit manager will be competing with node-rdkafka's auto-commit behavior.
+
+1. Implement a rebalance callback function which calls the the commit manager's onRebalance function any time your KafkaConsumer's partitions are revoked.
+
+   - Otherwise, the commit manager may later try to commit offsets for partitions which it is no longer assigned.
+
+   - The above example covers the minimum responsibilities of the function. See the node-rdkafka and/or librdkafka documentation for more details.
+
+1. Call the commit manager's readyToCommit function for each Kafka message you process.
+
+   - Only call readyToCommit when you have finished processing the message.
+   - Since the data objects provided by node-rdkafka's KafkaConsumer already have all of the necessary properties, you can just use those if you want to.
+
+### TypeScript
+
+```TypeScript
 import { useCommitManager } from "node-rdkafka-commit-manager";
 import { CODES, KafkaConsumer } from "node-rdkafka";
 
@@ -51,10 +72,10 @@ const consumer = new KafkaConsumer(
   {
     "enable.auto.commit": false,
     rebalance_cb: rebalanceCallback.bind(this),
-    <Your global config here (ex: authentication, consumer group, etc.)>
+    // <Your global config here (ex: authentication, consumer group, etc.)>
   },
   {
-    <Your topic config here>
+    // <Your topic config here>
   }
 );
 
@@ -66,25 +87,50 @@ consumer
     consumer.consume();
   })
   .on("data", function(data: any) {
-    <Process the Kafka message here.>
+    // <Process the Kafka message here.>
     readyToCommit(data);
   })
   .connect();
 ```
 
-The above example illustrates a few key points about using this commit manager:
+### Javascript
 
-1. Disable auto-commit feature on your KafkaConsumer.
+```JavaScript
+const { useCommitManager } = require("node-rdkafka-commit-manager");
+const { CODES, KafkaConsumer } = require("node-rdkafka");
 
-   - Otherwise, the commit manager will be competing with node-rdkafka's auto-commit behavior.
+const rebalanceCallback = async (err, assignments) => {
+  if (err.code === CODES.ERRORS.ERR__ASSIGN_PARTITIONS) {
+    consumer.assign(assignments);
+  } else if (err.code === CODES.ERRORS.ERR__REVOKE_PARTITIONS) {
+    consumer.unassign();
+    onRebalance();
+  } else {
+    console.error(`Kafka rebalance error : ${err}`);
+  }
+};
 
-1. Implement a rebalance callback function which calls the the commit manager's onRebalance function any time your KafkaConsumer's partitions are revoked.
+const consumer = new KafkaConsumer(
+  {
+    "enable.auto.commit": false,
+    rebalance_cb: rebalanceCallback.bind(this),
+    // <Your global config here (ex: authentication, consumer group, etc.)>
+  },
+  {
+    // <Your topic config here>
+  }
+);
 
-   - Otherwise, the commit manager may later try to commit offsets for partitions which it is no longer assigned.
+const { readyToCommit, onRebalance } = useCommitManager(consumer);
 
-   - The above example covers the minimum responsibilities of the function. See the node-rdkafka and/or librdkafka documentation for more details.
-
-1. Call the commit manager's readyToCommit function for each Kafka message you process.
-
-   - Only call readyToCommit when you have finished processing the message.
-   - Since the data objects provided by node-rdkafka's KafkaConsumer already have all of the necessary properties, you can just use those if you want to.
+consumer
+  .on("ready", function() {
+    consumer.subscribe(["phw.soteria.projects"]);
+    consumer.consume();
+  })
+  .on("data", function(data: any) {
+    // <Process the Kafka message here.>
+    readyToCommit(data);
+  })
+  .connect();
+```
