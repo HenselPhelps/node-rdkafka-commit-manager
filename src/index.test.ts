@@ -7,13 +7,13 @@ describe("useCommitManager", () => {
   const SHORT_WAIT = 2;
   const LONGER_WAIT = 6;
   const offsetDescription1 = { topic: "abc", partition: 1, offset: 5 };
-  const message1 = { ...offsetDescription1, value: "test1" };
+  const message1 = { ...offsetDescription1, offset: 4, value: "test1" };
   const offsetDescription2 = { topic: "def", partition: 2, offset: 2 };
-  const message2 = { ...offsetDescription2, value: "test2" };
+  const message2 = { ...offsetDescription2, offset: 1, value: "test2" };
   const offsetDescription3 = { topic: "ghi", partition: 3, offset: 4 };
-  const message3 = { ...offsetDescription3, value: "test3" };
+  const message3 = { ...offsetDescription3, offset: 3, value: "test3" };
   const offsetDescription4 = { topic: "def", partition: 2, offset: 3 };
-  const message4 = { ...offsetDescription4, value: "test4" };
+  const message4 = { ...offsetDescription4, offset: 2, value: "test4" };
 
   it("only commits the first offset immediately", () => {
     // arrange
