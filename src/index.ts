@@ -17,29 +17,29 @@ export const useCommitManager = (
 ) => {
   let readyOffsets: OffsetMap = {};
   let lastCommitTimestamp = 0;
-  let commitIntervalId: NodeJS.Timeout | null = null;
+  let commitTimeoutId: NodeJS.Timeout | null = null;
 
   const readyToCommit = (data: OffsetDescriptor) => {
     if (!readyOffsets[data.topic]) {
       readyOffsets[data.topic] = {};
     }
     readyOffsets[data.topic][data.partition.toString()] = data.offset;
+
     if (lastCommitTimestamp < Date.now() - commitIntervalMs) {
-      if (commitIntervalId) {
-        clearInterval(commitIntervalId);
-        commitIntervalId = null;
-      }
       commitReadyOffsets();
-    } else {
-      if (!commitIntervalId) {
-        commitIntervalId = setInterval(() => {
-          commitReadyOffsets();
-        }, commitIntervalMs);
-      }
+    } else if (!commitTimeoutId) {
+      commitTimeoutId = setTimeout(() => {
+        commitReadyOffsets();
+      }, commitIntervalMs);
     }
   };
 
   function commitReadyOffsets() {
+    if (commitTimeoutId) {
+      clearTimeout(commitTimeoutId);
+      commitTimeoutId = null;
+    }
+
     const offsetsToCommit = Object.entries(readyOffsets).reduce(
       (accumulator: OffsetDescriptor[], [topic, partitionOffsetMap]) => {
         const partitionOffsetDescriptors: OffsetDescriptor[] = Object.entries(
@@ -53,7 +53,8 @@ export const useCommitManager = (
       },
       []
     );
-    if (offsetsToCommit.length) consumer.commit(offsetsToCommit);
+
+    consumer.commit(offsetsToCommit);
     readyOffsets = {};
     lastCommitTimestamp = Date.now();
   }
