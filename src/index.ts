@@ -47,7 +47,7 @@ export const useCommitManager = (
         ).map(([partition, offset]) => ({
           topic: topic,
           partition: parseInt(partition),
-          offset: offset
+          offset: offset + 1
         }));
         return accumulator.concat(partitionOffsetDescriptors);
       },

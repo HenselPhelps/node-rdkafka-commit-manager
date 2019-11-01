@@ -28,7 +28,7 @@ The commit manager is exposed via a hook function (you don't need to be using Re
 ### Returned Functions
 
 - readyToCommit(data)
-  - data: This must be an object containing the properties "topic", "partition", and "offset".
+  - data: This must be an object containing the properties "topic", "partition", and "offset" from the Kafka mesage.
   - Call this whenever you are finished with a Kafka message.
 - onRebalance()
   - Call this whenever your KafkaConsumer has its partitions revoked.
@@ -96,7 +96,7 @@ consumer
   .connect();
 ```
 
-### Javascript
+### JavaScript
 
 ```JavaScript
 const { useCommitManager } = require("node-rdkafka-commit-manager");
