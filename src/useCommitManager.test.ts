@@ -4,8 +4,8 @@ import { KafkaConsumer } from "node-rdkafka";
 jest.mock("node-rdkafka");
 
 describe("useCommitManager", () => {
-  const ONE_MILLISECOND = 1;
-  const TWO_MILLISECONDS = 2;
+  const SHORT_WAIT = 2;
+  const LONGER_WAIT = 6;
   const offsetDescription1 = { topic: "abc", partition: 1, offset: 5 };
   const message1 = { ...offsetDescription1, value: "test1" };
   const offsetDescription2 = { topic: "def", partition: 2, offset: 2 };
@@ -18,7 +18,7 @@ describe("useCommitManager", () => {
     const commit = jest.fn();
     const consumer = new KafkaConsumer({}, {});
     consumer.commit = commit;
-    const { readyToCommit } = useCommitManager(consumer, ONE_MILLISECOND);
+    const { readyToCommit } = useCommitManager(consumer, SHORT_WAIT);
 
     // act
     readyToCommit(message1);
@@ -35,11 +35,11 @@ describe("useCommitManager", () => {
     const commit = jest.fn();
     const consumer = new KafkaConsumer({}, {});
     consumer.commit = commit;
-    const { readyToCommit } = useCommitManager(consumer, ONE_MILLISECOND);
+    const { readyToCommit } = useCommitManager(consumer, LONGER_WAIT);
 
     // act
     readyToCommit(message1);
-    await new Promise(resolve => setTimeout(resolve, ONE_MILLISECOND + 1));
+    await new Promise(resolve => setTimeout(resolve, LONGER_WAIT + SHORT_WAIT));
     readyToCommit(message2);
     readyToCommit(message3);
 
@@ -54,13 +54,13 @@ describe("useCommitManager", () => {
     const commit = jest.fn();
     const consumer = new KafkaConsumer({}, {});
     consumer.commit = commit;
-    const { readyToCommit } = useCommitManager(consumer, ONE_MILLISECOND);
+    const { readyToCommit } = useCommitManager(consumer, LONGER_WAIT);
 
     // act
     readyToCommit(message1);
     readyToCommit(message2);
     readyToCommit(message3);
-    await new Promise(resolve => setTimeout(resolve, ONE_MILLISECOND + 1));
+    await new Promise(resolve => setTimeout(resolve, LONGER_WAIT + SHORT_WAIT));
 
     // assert
     expect(consumer.commit).toHaveBeenCalledTimes(2);
@@ -76,12 +76,12 @@ describe("useCommitManager", () => {
     const commit = jest.fn();
     const consumer = new KafkaConsumer({}, {});
     consumer.commit = commit;
-    const { readyToCommit } = useCommitManager(consumer, TWO_MILLISECONDS);
+    const { readyToCommit } = useCommitManager(consumer, LONGER_WAIT);
 
     // act
     readyToCommit(message1);
     readyToCommit(message2);
-    await new Promise(resolve => setTimeout(resolve, TWO_MILLISECONDS + 1));
+    await new Promise(resolve => setTimeout(resolve, LONGER_WAIT + SHORT_WAIT));
     readyToCommit(message3);
 
     // assert
@@ -95,14 +95,14 @@ describe("useCommitManager", () => {
     const commit = jest.fn();
     const consumer = new KafkaConsumer({}, {});
     consumer.commit = commit;
-    const { readyToCommit } = useCommitManager(consumer, TWO_MILLISECONDS);
+    const { readyToCommit } = useCommitManager(consumer, LONGER_WAIT);
 
     // act
     readyToCommit(message1);
     readyToCommit(message2);
-    await new Promise(resolve => setTimeout(resolve, TWO_MILLISECONDS + 1));
+    await new Promise(resolve => setTimeout(resolve, LONGER_WAIT + SHORT_WAIT));
     readyToCommit(message3);
-    await new Promise(resolve => setTimeout(resolve, TWO_MILLISECONDS));
+    await new Promise(resolve => setTimeout(resolve, LONGER_WAIT));
 
     // assert
     expect(consumer.commit).toHaveBeenCalledTimes(3);
@@ -118,7 +118,7 @@ describe("useCommitManager", () => {
     consumer.commit = commit;
     const { readyToCommit, onRebalance } = useCommitManager(
       consumer,
-      ONE_MILLISECOND
+      SHORT_WAIT
     );
 
     // act
