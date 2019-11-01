@@ -26,8 +26,7 @@
     "@types/node": "^12.12.3",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
-    "typescript": "^3.6.4",
-    "node-rdkafka": "^2.7.1-2"
+    "typescript": "^3.6.4"
   },
   "jest": {
     "roots": [
@@ -36,5 +35,8 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     }
+  },
+  "dependencies": {
+    "node-rdkafka": "^2.7.1-2"
   }
 }

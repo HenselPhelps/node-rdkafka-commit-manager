@@ -1,4 +1,4 @@
-import { useCommitManager } from "./useCommitManager";
+import { useCommitManager } from ".";
 import { KafkaConsumer } from "node-rdkafka";
 
 jest.mock("node-rdkafka");
