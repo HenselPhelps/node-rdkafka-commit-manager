@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/HenselPhelps/node-rdkafka-commit-manager.svg?branch=master)](https://travis-ci.org/HenselPhelps/node-rdkafka-commit-manager)
 [![Coverage Status](https://coveralls.io/repos/github/HenselPhelps/node-rdkafka-commit-manager/badge.svg?branch=master)](https://coveralls.io/github/HenselPhelps/node-rdkafka-commit-manager?branch=master)
+[![npm version](https://badge.fury.io/js/node-rdkafka-commit-manager.svg)](https://badge.fury.io/js/node-rdkafka-commit-manager)
 
 A simple helper for controlling when an offset is ready to be committed via node-rdkafka.
 

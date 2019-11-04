@@ -2,6 +2,11 @@
   "name": "node-rdkafka-commit-manager",
   "version": "2.0.0",
   "description": "A simple helper for controlling when an offset is ready to be committed via node-rdkafka.",
+  "keywords": [
+    "kafka",
+    "librdkafka",
+    "node-rdkafka"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
