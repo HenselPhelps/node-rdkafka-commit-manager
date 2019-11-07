@@ -132,7 +132,7 @@ consumer
     consumer.subscribe(["phw.soteria.projects"]);
     consumer.consume();
   })
-  .on("data", function(data: any) {
+  .on("data", function(data) {
     // <Process the Kafka message here.>
     readyToCommit(data);
   })
