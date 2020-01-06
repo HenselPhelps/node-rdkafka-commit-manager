@@ -27,12 +27,12 @@
   },
   "homepage": "https://github.com/HenselPhelps/node-rdkafka-commit-manager#readme",
   "devDependencies": {
-    "@types/jest": "^24.0.21",
-    "@types/node": "^12.12.3",
-    "coveralls": "^3.0.7",
+    "@types/jest": "^24.0.25",
+    "@types/node": "^12.12.24",
+    "coveralls": "^3.0.9",
     "jest": "^24.9.0",
-    "ts-jest": "^24.1.0",
-    "typescript": "^3.6.4"
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.4"
   },
   "jest": {
     "roots": [
@@ -49,6 +49,6 @@
     ]
   },
   "dependencies": {
-    "node-rdkafka": "^2.7.1-2"
+    "node-rdkafka": "^2.7.4"
   }
 }

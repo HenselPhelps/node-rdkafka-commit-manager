@@ -44,6 +44,11 @@ The examples below illustrate a few key points about using this commit manager:
 
    - Otherwise, the commit manager will be competing with node-rdkafka's auto-commit behavior.
 
+1. Use non-flowing mode on your KafkaConsumer.
+
+   - Otherwise, node-rdkafka will provide batches of messages, which may be handled out of order.
+   - Since non-flowing mode only allows for one message at a time, it will significantly slow the rate at which a single consumer can process messages, so additional horizontal scaling is necessary to compensate.
+
 1. Implement a rebalance callback function which calls the the commit manager's onRebalance function any time your KafkaConsumer's partitions are revoked.
 
    - Otherwise, the commit manager may later try to commit offsets for partitions which it is no longer assigned.
@@ -60,6 +65,19 @@ The examples below illustrate a few key points about using this commit manager:
 ```TypeScript
 import { useCommitManager } from "node-rdkafka-commit-manager";
 import { CODES, KafkaConsumer } from "node-rdkafka";
+
+const consumeNonFlowing = (consumer, consumeTimeout) => {
+  consumer.consume(1);
+  return setInterval(function() {
+    consumer.consume(1);
+  }, CONSUME_TIMEOUT_MS);
+};
+
+const stopConsuming = (consumeInterval) => {
+  if (consumeInterval) {
+    clearInterval(consumeInterval);
+  }
+};
 
 const rebalanceCallback = async (err: any, assignments: any) => {
   if (err.code === CODES.ERRORS.ERR__ASSIGN_PARTITIONS) {
@@ -84,15 +102,19 @@ const consumer = new KafkaConsumer(
 );
 
 const { readyToCommit, onRebalance } = useCommitManager(consumer);
-
+const CONSUME_TIMEOUT_MS = 1000;
+let consumeInterval: NodeJS.Timeout;
 consumer
   .on("ready", function() {
-    consumer.subscribe(["phw.soteria.projects"]);
-    consumer.consume();
+    consumer.subscribe(["sample.test.topic"]);
+    consumer.setDefaultConsumeTimeout(CONSUME_TIMEOUT_MS);
+    consumeInterval = consumeNonFlowing(consumer, CONSUME_TIMEOUT_MS);
   })
   .on("data", function(data: any) {
+    stopConsuming(consumeInterval);
     // <Process the Kafka message here.>
     readyToCommit(data);
+    consumeInterval = consumeNonFlowing(consumer, CONSUME_TIMEOUT_MS);
   })
   .connect();
 ```
@@ -102,6 +124,19 @@ consumer
 ```JavaScript
 const { useCommitManager } = require("node-rdkafka-commit-manager");
 const { CODES, KafkaConsumer } = require("node-rdkafka");
+
+const consumeNonFlowing = (consumer, consumeTimeout) => {
+  consumer.consume(1);
+  return setInterval(function() {
+    consumer.consume(1);
+  }, CONSUME_TIMEOUT_MS);
+};
+
+const stopConsuming = (consumeInterval) => {
+  if (consumeInterval) {
+    clearInterval(consumeInterval);
+  }
+};
 
 const rebalanceCallback = async (err, assignments) => {
   if (err.code === CODES.ERRORS.ERR__ASSIGN_PARTITIONS) {
@@ -126,15 +161,19 @@ const consumer = new KafkaConsumer(
 );
 
 const { readyToCommit, onRebalance } = useCommitManager(consumer);
-
+const CONSUME_TIMEOUT_MS = 1000;
+let consumeInterval;
 consumer
   .on("ready", function() {
-    consumer.subscribe(["phw.soteria.projects"]);
-    consumer.consume();
+    consumer.subscribe(["sample.test.topic"]);
+    consumer.setDefaultConsumeTimeout(CONSUME_TIMEOUT_MS);
+    consumeInterval = consumeNonFlowing(consumer, CONSUME_TIMEOUT_MS);
   })
   .on("data", function(data) {
+    stopConsuming(consumeInterval);
     // <Process the Kafka message here.>
     readyToCommit(data);
+    consumeInterval = consumeNonFlowing(consumer, CONSUME_TIMEOUT_MS);
   })
   .connect();
 ```
