@@ -1,6 +1,6 @@
 {
   "name": "node-rdkafka-commit-manager",
-  "version": "2.0.2",
+  "version": "2.0.1",
   "description": "A simple helper for controlling when an offset is ready to be committed via node-rdkafka.",
   "keywords": [
     "kafka",
